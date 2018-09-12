@@ -56,6 +56,7 @@ public class search_by_code extends AppCompatActivity {
 
     }
     public  void Scan(View view){
+        barcode.getText().clear();
         Intent scan_screen = new Intent(this, FullscreenActivity.class);
         final int result = 1;
         scan_screen.putExtra("callingActivity", "MainActivity");

@@ -3,6 +3,7 @@ package com.qbase.skipper.q_base;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -11,6 +12,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.vision.barcode.Barcode;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -36,56 +39,81 @@ import java.util.List;
 
 public class table_redactor extends AppCompatActivity {
     String ServerURL = "http://qbase.info/update_product.php" ;
-    EditText name, stock;
-    Button button;
+    EditText name, stock, barcodes;
+    Button button, enter;
     String TempName, TempStock,TempBarcode,TempStatus ;
     TextView barcode,user;
-    Spinner users;
+    Spinner users, barcodesspin;
     BufferedInputStream is;
-    String  username;
+    String  username, bn;
     ArrayList<String> listitem = new ArrayList<>();
     ArrayAdapter<String> adapter;
+    ArrayList<String> listitemb = new ArrayList<>();
+    ArrayAdapter<String> adapterb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table_redactor);
 
-        user = (TextView) findViewById(R.id.user);
+        user = findViewById(R.id.user);
 
         user.setText(getIntent().getExtras().getString("usr"));
 
-        stock = (EditText)findViewById(R.id.inst_table);
+        username = user.getText().toString().replace(" ","");
 
-        barcode = (TextView) findViewById(R.id.barcode);
+        stock = findViewById(R.id.inst_table);
 
-        button = (Button)findViewById(R.id.edit_table);
+        barcode = findViewById(R.id.barcode);
+
+        button = findViewById(R.id.edit_table);
 
         barcode.setText(getIntent().getExtras().getString("dnum"));
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                GetData();
-                InsertData(TempName, TempStock, TempBarcode, TempStatus);
-                Intent bs = new Intent(table_redactor.this, barcode_scan.class);
-                startActivity(bs);
-                finish();
 
-            }
-        });
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if()
+                        GetData();
+                        InsertData(TempName, TempStock, TempBarcode, TempStatus);
+                        Intent bs = new Intent(table_redactor.this, barcode_scan.class);
+                        startActivity(bs);
+                        finish();
+
+                    }
+                });
         users  = findViewById(R.id.users);
+        barcodesspin = findViewById(R.id.barcodesspin);
         adapter = new ArrayAdapter<String>(this, R.layout.spinner_users_lay, R.id.txt, listitem);
         users.setAdapter(adapter);
+        adapterb = new ArrayAdapter<String>(this, R.layout.spinner_barcodes_lay, R.id.txt, listitemb);
+        barcodesspin.setAdapter(adapterb);
 
 
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        bn = data.getStringExtra("decode_num");
+        barcode.setText(bn);
+        barcodesspin.setSelection(adapterb.getPosition(bn));
     }
     protected void onStart(){
         super.onStart();
         SpinnerUsers su = new SpinnerUsers();
         su.execute();
+        SpinnerBarcodes sb = new SpinnerBarcodes();
+        sb.execute();
     }
 
+    public  void Scan(View view){
+        Intent scan_screen = new Intent(this, FullscreenActivity.class);
+        final int result = 1;
+        scan_screen.putExtra("callingActivity", "MainActivity");
+        startActivityForResult(scan_screen,result);
+
+    }
 
     private class SpinnerUsers extends  AsyncTask<Void, Void, Void>{
         ArrayList<String> list;
@@ -138,12 +166,75 @@ public class table_redactor extends AppCompatActivity {
         }
 
     }
+
+
+    private class SpinnerBarcodes extends  AsyncTask<Void, Void, Void>{
+        ArrayList<String> listb;
+        protected void onPreExecute(){
+            super.onPreExecute();
+            listb = new ArrayList<>();
+        }
+        protected Void doInBackground(Void ... params){
+            InputStream isb =null;
+            String resultb = "";
+            ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+
+            nameValuePairs.add(new BasicNameValuePair("Name", username));
+
+            try{
+                HttpClient httpClientb = new DefaultHttpClient();
+
+                HttpPost httpPostb = new HttpPost("http://qbase.info/database/get_barcodes.php");
+
+                httpPostb.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+
+                HttpResponse httpResponseb = httpClientb.execute(httpPostb);
+
+                HttpEntity httpEntityb = httpResponseb.getEntity();
+
+                isb = httpEntityb.getContent();
+
+            }catch (Exception eb){
+                eb.printStackTrace();
+            }
+            try {
+                BufferedReader brb =  new BufferedReader(new InputStreamReader(isb, "UTF-8"));
+                String lineb ="";
+                while((lineb = brb.readLine())!=null){
+                    resultb += lineb;
+                }
+                isb.close();
+
+            }catch (IOException e ){
+                e.printStackTrace();
+            }
+
+            try {
+                JSONArray jsonArrayb = new JSONArray(resultb);
+                for(int i = 0; i<jsonArrayb.length(); i++){
+                    JSONObject jsonObjectb = jsonArrayb.getJSONObject(i);
+                    listb.add(jsonObjectb.getString("Barcode"));
+                }
+            }catch (JSONException jse){
+                jse.printStackTrace();
+            }return null;
+
+        }
+        protected void onPostExecute(Void resultb){
+            listitemb.addAll(listb);
+            adapterb.notifyDataSetChanged();
+        }
+
+
+    }
+
+
     public void GetData(){
         TempStatus = "wait";
         TempName = users.getSelectedItem().toString();
         TempStock = stock.getText().toString();
         Toast.makeText(table_redactor.this, users.getSelectedItem().toString(), Toast.LENGTH_LONG).show();
-        TempBarcode = barcode.getText().toString();
+        TempBarcode = bn;
     }
 
     public void InsertData(final String name,final String stock, final String barcode, final String status){

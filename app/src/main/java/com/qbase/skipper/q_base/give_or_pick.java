@@ -37,7 +37,7 @@ public class give_or_pick extends AppCompatActivity {
         giv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent givin = new Intent(give_or_pick.this,barcode_scan.class);
+                Intent givin = new Intent(give_or_pick.this,table_redactor.class);
                 givin.putExtra("usr", username);
                 startActivity(givin);
             }
