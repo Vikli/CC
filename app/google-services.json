@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "230280980062",
+    "firebase_url": "https://qbase-faa59.firebaseio.com",
+    "project_id": "qbase-faa59",
+    "storage_bucket": "qbase-faa59.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230280980062:android:d26ace2cc998012b",
+        "android_client_info": {
+          "package_name": "com.qbase.skipper.q_base"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "230280980062-3pf11t91a50t3aspndpduo3osg2t682i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOJWlivWV9iXMhJQLNlJuCJwxLQn3e2L0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
