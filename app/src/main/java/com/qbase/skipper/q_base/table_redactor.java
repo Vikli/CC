@@ -74,13 +74,13 @@ public class table_redactor extends AppCompatActivity {
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if()
-                        GetData();
-                        InsertData(TempName, TempStock, TempBarcode, TempStatus);
-                        Intent bs = new Intent(table_redactor.this, barcode_scan.class);
-                        startActivity(bs);
-                        finish();
-
+                        if( barcodesspin.getSelectedItem().toString().equals(barcode.getText().toString())) {
+                            GetData();
+                            InsertData(TempName, TempStock, TempBarcode, TempStatus);
+                            Intent bs = new Intent(table_redactor.this, barcode_scan.class);
+                            startActivity(bs);
+                            finish();
+                        }
                     }
                 });
         users  = findViewById(R.id.users);
@@ -233,7 +233,6 @@ public class table_redactor extends AppCompatActivity {
         TempStatus = "wait";
         TempName = users.getSelectedItem().toString();
         TempStock = stock.getText().toString();
-        Toast.makeText(table_redactor.this, users.getSelectedItem().toString(), Toast.LENGTH_LONG).show();
         TempBarcode = bn;
     }
 

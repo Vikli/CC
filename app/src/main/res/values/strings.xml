@@ -51,4 +51,5 @@
     <string name="title_ru">Номенклатура</string>
     <string name="user_ru">Ответственное лицо</string>
     <string name="stock_ru">Склад</string>
+    <string name="stat">Статус</string>
 </resources>
