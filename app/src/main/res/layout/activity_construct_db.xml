@@ -121,15 +121,10 @@
             android:text="@string/stock"
             android:textSize="17dip" />
 
-        <EditText
-            android:id="@+id/inputDesc"
-            android:layout_width="fill_parent"
-            android:layout_height="41dp"
-            android:layout_margin="5dip"
-            android:layout_marginBottom="15dip"
-            android:gravity="top"
-            android:lines="4"
-            android:singleLine="true" />
+        <Spinner
+            android:id="@+id/stock2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <TextView
             android:layout_width="fill_parent"

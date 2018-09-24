@@ -42,8 +42,10 @@ public class construct_db extends AppCompatActivity {
     String TempName, TempEmail, TempStock, TempAuthor, username ;
     ArrayList<String> listitem = new ArrayList<>();
     ArrayAdapter<String> adapter;
-    Spinner users;
+    Spinner users, stocks;
     private String TempStatus;
+    ArrayList<String> listitems = new ArrayList<>();
+    ArrayAdapter<String> adapters;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +53,7 @@ public class construct_db extends AppCompatActivity {
         username = getIntent().getExtras().getString("usr");
         name = findViewById(R.id.inputName);
         email = findViewById(R.id.inputPrice);
-        stock = findViewById(R.id.inputDesc);
+        stocks = findViewById(R.id.stock2);
 
         user = findViewById(R.id.user);
 
@@ -72,12 +74,15 @@ public class construct_db extends AppCompatActivity {
         users  = findViewById(R.id.users);
         adapter = new ArrayAdapter<String>(this, R.layout.spinner_users_lay, R.id.txt, listitem);
         users.setAdapter(adapter);
-
+        adapters = new ArrayAdapter<String>(this, R.layout.spinner_stocks_lay, R.id.txt, listitems);
+        stocks.setAdapter(adapters);
     }
     protected void onStart(){
         super.onStart();
         construct_db.SpinnerUsers su = new construct_db.SpinnerUsers();
         su.execute();
+        construct_db.SpinnerStock ss = new  construct_db.SpinnerStock();
+        ss.execute();
     }
 
     private class SpinnerUsers extends  AsyncTask<Void, Void, Void>{
@@ -131,11 +136,62 @@ public class construct_db extends AppCompatActivity {
         }
 
     }
+    private class SpinnerStock extends  AsyncTask<Void, Void, Void>{
+        ArrayList<String> lists;
+        protected void onPreExecute(){
+            super.onPreExecute();
+            lists = new ArrayList<>();
+        }
+        protected Void doInBackground(Void ... params){
+            InputStream is =null;
+            String result = "";
+            try{
+                HttpClient httpClient = new DefaultHttpClient();
+
+                HttpPost httpPost = new HttpPost("http://qbase.info/database/get_stocks.php");
+
+                HttpResponse httpResponse = httpClient.execute(httpPost);
+
+                HttpEntity httpEntity = httpResponse.getEntity();
+                is = httpEntity.getContent();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            try {
+                BufferedReader br =  new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                String line ="";
+                while((line = br.readLine())!=null){
+                    result += line;
+                }
+                is.close();
+
+            }catch (IOException e ){
+                e.printStackTrace();
+            }
+
+            try {
+                JSONArray jsonArray = new JSONArray(result);
+                for(int i = 0; i<jsonArray.length(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    lists.add(jsonObject.getString("Title"));
+                }
+            }catch (JSONException jse){
+                jse.printStackTrace();
+            }return null;
+
+        }
+        protected void onPostExecute(Void result){
+            listitems.addAll(lists);
+            adapters.notifyDataSetChanged();
+        }
+
+    }
+
     public void GetData(){
         TempStatus = "wait";
         TempName = name.getText().toString();
         TempEmail = email.getText().toString();
-        TempStock = stock.getText().toString();
+        TempStock = stocks.getSelectedItem().toString();
         TempAuthor = users.getSelectedItem().toString();
 
     }

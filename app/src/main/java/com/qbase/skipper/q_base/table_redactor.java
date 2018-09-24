@@ -39,17 +39,19 @@ import java.util.List;
 
 public class table_redactor extends AppCompatActivity {
     String ServerURL = "http://qbase.info/update_product.php" ;
-    EditText name, stock, barcodes;
-    Button button, enter;
+    EditText name, stock;
+    Button button;
     String TempName, TempStock,TempBarcode,TempStatus ;
     TextView barcode,user;
-    Spinner users, barcodesspin;
+    Spinner users, barcodesspin, stocks;
     BufferedInputStream is;
     String  username, bn;
     ArrayList<String> listitem = new ArrayList<>();
     ArrayAdapter<String> adapter;
     ArrayList<String> listitemb = new ArrayList<>();
     ArrayAdapter<String> adapterb;
+    ArrayList<String> listitems = new ArrayList<>();
+    ArrayAdapter<String> adapters;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +63,6 @@ public class table_redactor extends AppCompatActivity {
         user.setText(getIntent().getExtras().getString("usr"));
 
         username = user.getText().toString().replace(" ","");
-
-        stock = findViewById(R.id.inst_table);
 
         barcode = findViewById(R.id.barcode);
 
@@ -85,10 +85,13 @@ public class table_redactor extends AppCompatActivity {
                 });
         users  = findViewById(R.id.users);
         barcodesspin = findViewById(R.id.barcodesspin);
+        stocks = findViewById(R.id.stock);
         adapter = new ArrayAdapter<String>(this, R.layout.spinner_users_lay, R.id.txt, listitem);
         users.setAdapter(adapter);
         adapterb = new ArrayAdapter<String>(this, R.layout.spinner_barcodes_lay, R.id.txt, listitemb);
         barcodesspin.setAdapter(adapterb);
+        adapters = new ArrayAdapter<String>(this, R.layout.spinner_stocks_lay, R.id.txt, listitems);
+        stocks.setAdapter(adapters);
 
 
     }
@@ -105,6 +108,8 @@ public class table_redactor extends AppCompatActivity {
         su.execute();
         SpinnerBarcodes sb = new SpinnerBarcodes();
         sb.execute();
+        SpinnerStock ss = new SpinnerStock();
+        ss.execute();
     }
 
     public  void Scan(View view){
@@ -166,7 +171,56 @@ public class table_redactor extends AppCompatActivity {
         }
 
     }
+    private class SpinnerStock extends  AsyncTask<Void, Void, Void>{
+        ArrayList<String> lists;
+        protected void onPreExecute(){
+            super.onPreExecute();
+            lists = new ArrayList<>();
+        }
+        protected Void doInBackground(Void ... params){
+            InputStream is =null;
+            String result = "";
+            try{
+                HttpClient httpClient = new DefaultHttpClient();
 
+                HttpPost httpPost = new HttpPost("http://qbase.info/database/get_stocks.php");
+
+                HttpResponse httpResponse = httpClient.execute(httpPost);
+
+                HttpEntity httpEntity = httpResponse.getEntity();
+                is = httpEntity.getContent();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            try {
+                BufferedReader br =  new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                String line ="";
+                while((line = br.readLine())!=null){
+                    result += line;
+                }
+                is.close();
+
+            }catch (IOException e ){
+                e.printStackTrace();
+            }
+
+            try {
+                JSONArray jsonArray = new JSONArray(result);
+                for(int i = 0; i<jsonArray.length(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    lists.add(jsonObject.getString("Title"));
+                }
+            }catch (JSONException jse){
+                jse.printStackTrace();
+            }return null;
+
+        }
+        protected void onPostExecute(Void result){
+            listitems.addAll(lists);
+            adapters.notifyDataSetChanged();
+        }
+
+    }
 
     private class SpinnerBarcodes extends  AsyncTask<Void, Void, Void>{
         ArrayList<String> listb;
@@ -232,7 +286,7 @@ public class table_redactor extends AppCompatActivity {
     public void GetData(){
         TempStatus = "wait";
         TempName = users.getSelectedItem().toString();
-        TempStock = stock.getText().toString();
+        TempStock = stocks.getSelectedItem().toString();
         TempBarcode = bn;
     }
 

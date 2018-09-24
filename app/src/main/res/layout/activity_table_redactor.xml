@@ -92,13 +92,10 @@
             android:text="Склад:"
             android:textSize="20sp" />
 
-        <EditText
-            android:id="@+id/inst_table"
+        <Spinner
+            android:id="@+id/stock"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:ems="10"
-            android:inputType="textPersonName"
-            tools:text="@string/sclad" />
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:layout_width="match_parent"
